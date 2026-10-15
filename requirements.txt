@@ -1,0 +1,4 @@
+plotly>=5.0.0
+streamlit>=1.66.0
+pandas
+# (and any other dependencies your app uses)
