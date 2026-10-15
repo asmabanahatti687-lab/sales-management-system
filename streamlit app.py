@@ -201,34 +201,7 @@ if "logged_in" not in st.session_state:
   st.session_state["user"] = None
   st.session_state["role"] = None
   st.session_state["name"] = None
-
-
-# ==========================================
-# LOGIN & AUTHENTICATION MODULE
-# ==========================================
-def login_page():
-  st.markdown("<br><br>", unsafe_allow_html=True)
-  col1, col2, col3 = st.columns([1, 1.2, 1])
-
-  with col2:
-    st.markdown(
-        """
-        <div class="card" style="text-align: center;">
-            <h2>📦 Sales Management System</h2>
-            <p style="color: #64748B;">Please sign in to continue</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    with st.form("login_form"):
-      username = st.text_input("Username or Email", placeholder="admin or staff")
-      password = st.text_input("Password", type="password")
-      submit = st.form_submit_button(
-          "Sign In", use_container_width=True, type="primary"
-      )
-
-      if submit:
+        if submit:
         cursor = conn.cursor()
         cursor.execute(
             "SELECT role, name FROM users WHERE username = ? AND password = ?",
