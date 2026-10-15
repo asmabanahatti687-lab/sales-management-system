@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Management System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-800 antialiased overflow-hidden">
+
+    <div id="app" class="h-full w-full flex flex-col">
+        
+        <!-- LOGIN VIEW -->
+        <div id="login-view" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-4">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-100 transform transition-all">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600 text-white text-2xl font-bold shadow-lg shadow-indigo-500/30 mb-3">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-900">SalesOS Portal</h1>
+                    <p class="text-xs text-slate-500 mt-1">Sign in to access your business analytics & sales</p>
+                </div>
+
+                <form id="login-form" class="space-y-4" onsubmit="handleLogin(event)">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Email Address</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-envelope text-sm"></i>
+                            </span>
+                            <input type="email" id="login-email" required value="admin@salesos.com"
+                                class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                                placeholder="name@company.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                <i class="fa-solid fa-lock text-sm"></i>
+                            </span>
+                            <input type="password" id="login-password" required value="password123"
+                                class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs pt-1">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                            <span class="ml-2 text-slate-600">Remember session</span>
+                        </label>
+                        <a href="#" onclick="showDemoInfo(event)" class="text-indigo-600 hover:text-indigo-700 font-semibold">Demo Login</a>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 mt-2">
+                        <span>Sign In to Dashboard</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div id="login-error" class="hidden mt-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl text-center font-medium">
+                    Invalid email or password. Please try again.
+                </div>
+
+                <div class="mt-8 text-center border-t border-slate-100 pt-5">
+                    <p class="text-[11px] text-slate-400">SalesOS Cloud Environment &bull; Enterprise v2.5</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-app" class="hidden h-full flex flex-col md:flex-row overflow-hidden">
+            
+            <!-- Navigation Sidebar -->
+            <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between border-r border-slate-800 shrink-0">
+                <div>
+                    <!-- Brand Header -->
+                    <div class="p-5 flex items-center space-x-3 border-b border-slate-800">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-500/30">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <span class="font-bold text-white text-lg tracking-tight block">SalesOS</span>
+                            <span class="text-[10px] uppercase font-semibold tracking-wider text-indigo-400">Management Hub</span>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Items -->
+                    <nav class="p-3 space-y-1">
+                        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+                            <i class="fa-solid fa-house w-4 text-center"></i>
+                            <span>Dashboard</span>
+                        </button>
+                        <button onclick="switchTab('orders')" id="nav-orders" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-medium transition-all hover:bg-slate-800 text-slate-400 hover:text-white">
+                            <i class="fa-solid fa-cart-shopping w-4 text-center"></i>
+                            <span>Orders & Sales</span>
+                        </button>
+                        <button onclick="switchTab('products')" id="nav-products" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-medium transition-all hover:bg-slate-800 text-slate-400 hover:text-white">
+                            <i class="fa-solid fa-box-archive w-4 text-center"></i>
+                            <span>Products & Inventory</span>
+                        </button>
+                        <button onclick="switchTab('customers')" id="nav-customers" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-medium transition-all hover:bg-slate-800 text-slate-400 hover:text-white">
+                            <i class="fa-solid fa-users w-4 text-center"></i>
+                            <span>Customers</span>
+                        </button>
+                        <button onclick="switchTab('reports')" id="nav-reports" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-medium transition-all hover:bg-slate-800 text-slate-400 hover:text-white">
+                            <i class="fa-solid fa-chart-pie w-4 text-center"></i>
+                            <span>Reports & Analytics</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Account & Signout -->
+                <div class="p-4 border-t border-slate-800 bg-slate-950/40">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs border border-indigo-500/30">
+                            AD
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-white truncate" id="user-display-name">Administrator</p>
+                            <p class="text-[10px] text-slate-400 truncate">admin@salesos.com</p>
+                        </div>
+                    </div>
+                    <button onclick="handleLogout()" class="w-full py-2 px-3 bg-slate-800 hover:bg-rose-600/20 hover:text-rose-400 border border-slate-700/50 hover:border-rose-500/30 text-slate-300 rounded-xl text-xs font-medium transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Workspace Canvas -->
+            <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
+                <!-- Top Navigation Header -->
+                <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0">
+                    <div class="flex items-center space-x-4">
+                        <h2 id="page-title" class="text-base font-bold text-slate-800">Dashboard Overview</h2>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="relative hidden sm:block">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                            </span>
+                            <input type="text" placeholder="Search orders, clients..." class="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 w-56">
+                        </div>
+                        <button onclick="triggerNotification()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center relative transition-all">
+                            <i class="fa-solid fa-bell text-xs"></i>
+                            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-indigo-600"></span>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Scrollable Tab Views Container -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                    
+                    <div id="tab-dashboard" class="space-y-6">
+                        <!-- Stat Metric Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Revenue</span>
+                                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
+                                        <i class="fa-solid fa-dollar-sign"></i>
+                                    </div>
+                                </div>
+                                <div class="flex items-baseline space-x-2">
+                                    <h3 class="text-2xl font-bold text-slate-800">$54,820</h3>
+                                    <span class="text-xs font-semibold text-emerald-600 flex items-center"><i class="fa-solid fa-arrow-up mr-0.5"></i>+14.2%</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Oct 1 - Oct 15, 2026</p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Orders</span>
+                                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">
+                                        <i class="fa-solid fa-cart-shopping"></i>
+                                    </div>
+                                </div>
+                                <div class="flex items-baseline space-x-2">
+                                    <h3 class="text-2xl font-bold text-slate-800">412</h3>
+                                    <span class="text-xs font-semibold text-blue-600 flex items-center"><i class="fa-solid fa-arrow-up mr-0.5"></i>+6.8%</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">24 orders pending processing</p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Products Sold</span>
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                                        <i class="fa-solid fa-box-open"></i>
+                                    </div>
+                                </div>
+                                <div class="flex items-baseline space-x-2">
+                                    <h3 class="text-2xl font-bold text-slate-800">1,580</h3>
+                                    <span class="text-xs font-semibold text-indigo-600 flex items-center"><i class="fa-solid fa-arrow-up mr-0.5"></i>+9.1%</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Top category: Software Licenses</p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active Clients</span>
+                                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xs">
+                                        <i class="fa-solid fa-users"></i>
+                                    </div>
+                                </div>
+                                <div class="flex items-baseline space-x-2">
+                                    <h3 class="text-2xl font-bold text-slate-800">128</h3>
+                                    <span class="text-xs font-semibold text-purple-600 flex items-center"><i class="fa-solid fa-arrow-up mr-0.5"></i>+3.5%</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">12 new accounts this month</p>
+                            </div>
+                        </div>
+
+                        <!-- Chart & Recent Activity Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h3 class="font-bold text-slate-800 text-sm">Revenue Forecast & Growth</h3>
+                                        <p class="text-xs text-slate-400">Monthly revenue breakdown for 2026</p>
+                                    </div>
+                                    <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">Real-Time Sync</span>
+                                </div>
+                                <div class="h-72">
+                                    <canvas id="revenueChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-sm mb-1">Live Audit Feed</h3>
+                                    <p class="text-xs text-slate-400 mb-4">Real-time system transactions</p>
+                                    
+                                    <div class="space-y-4">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                                                <i class="fa-solid fa-check"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-xs font-bold text-slate-800">Payment Processed</p>
+                                                <p class="text-[11px] text-slate-500">Order #ORD-1095 &bull; $1,250.00</p>
+                                                <span class="text-[10px] text-slate-400">5 minutes ago</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                                                <i class="fa-solid fa-user-plus"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-xs font-bold text-slate-800">New Client Onboarded</p>
+                                                <p class="text-[11px] text-slate-500">Nexus Technology Corp</p>
+                                                <span class="text-[10px] text-slate-400">22 minutes ago</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-xs font-bold text-slate-800">Low Stock Warning</p>
+                                                <p class="text-[11px] text-slate-500">Server Hardware Unit (Stock: 3)</p>
+                                                <span class="text-[10px] text-slate-400">1 hour ago</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="switchTab('orders')" class="w-full mt-6 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2">
+                                    <span>View All Sales Records</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: ORDERS -->
+                    <div id="tab-orders" class="hidden space-y-6">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-sm">Sales Orders Ledger</h3>
+                                    <p class="text-xs text-slate-400">Track and manage customer transaction records</p>
+                                </div>
+                                <button onclick="openNewOrderModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span>Create Sales Order</span>
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-400 uppercase tracking-wider border-b border-slate-200">
+                                            <th class="p-4 font-semibold">Order ID</th>
+                                            <th class="p-4 font-semibold">Client Name</th>
+                                            <th class="p-4 font-semibold">Date</th>
+                                            <th class="p-4 font-semibold">Total Amount</th>
+                                            <th class="p-4 font-semibold">Fulfillment</th>
+                                            <th class="p-4 font-semibold text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orders-table-body" class="divide-y divide-slate-100 text-slate-700">
+                                        <!-- Dynamic Orders Table Body -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: PRODUCTS -->
+                    <div id="tab-products" class="hidden space-y-6">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-sm">Inventory & Product Catalog</h3>
+                                    <p class="text-xs text-slate-400">Manage stock levels, pricing, categories, and SKU tracking</p>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <select id="product-category-filter" onchange="filterProducts()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="All">All Categories</option>
+                                        <option value="Software">Software</option>
+                                        <option value="Hardware">Hardware</option>
+                                        <option value="Infrastructure">Infrastructure</option>
+                                        <option value="Services">Services</option>
+                                    </select>
+                                    <button onclick="openAddProductModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all flex items-center space-x-2">
+                                        <i class="fa-solid fa-box-archive"></i>
+                                        <span>Add Product</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Product Cards Grid -->
+                            <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Dynamic Product Cards Inserted via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: CUSTOMERS -->
+                    <div id="tab-customers" class="hidden space-y-6">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-sm">Customer Directory</h3>
+                                    <p class="text-xs text-slate-400">Verified client accounts and transaction histories</p>
+                                </div>
+                                <button onclick="alertBox('Customer onboarding dialog opened.', 'Onboard Client')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all flex items-center space-x-2">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                    <span>New Customer</span>
+                                </button>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center">AC</div>
+                                        <div>
+                                            <p class="font-bold text-slate-800">Acme Corporation</p>
+                                            <p class="text-slate-400 text-[11px]">contact@acme.com &bull; +1 (555) 234-5678</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-bold text-slate-800">$12,450 Total Spent</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center">GL</div>
+                                        <div>
+                                            <p class="font-bold text-slate-800">Globex Logistics</p>
+                                            <p class="text-slate-400 text-[11px]">ops@globex.com &bull; +1 (555) 987-6543</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-bold text-slate-800">$8,900 Total Spent</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: REPORTS -->
+                    <div id="tab-reports" class="hidden space-y-6">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 text-center">
+                            <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mx-auto mb-3">
+                                <i class="fa-solid fa-file-invoice-dollar"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-800">Sales Reports & Analytics</h3>
+                            <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Export CSV summaries, revenue statements, and custom range metrics.</p>
+                            <button onclick="alertBox('Report CSV exported successfully!', 'Data Export')" class="mt-4 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center space-x-2 mx-auto">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Export Monthly Summary (CSV)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+
+    </div>
+
+    <!-- Custom Dialog Modal -->
+    <div id="custom-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all">
+            <div id="modal-icon" class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mx-auto mb-3">
+                <i class="fa-solid fa-info"></i>
+            </div>
+            <h4 id="modal-title" class="font-bold text-slate-800 text-base mb-1">Notice</h4>
+            <p id="modal-message" class="text-xs text-slate-500 mb-5">System action feedback message.</p>
+            <button onclick="closeModal()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all">
+                Acknowledge
+            </button>
+        </div>
+    </div>
+
+    <!-- New Order Modal -->
+    <div id="new-order-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-800 text-sm">Create New Sales Order</h3>
+                <button onclick="closeNewOrderModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form onsubmit="submitNewOrder(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Client Name</label>
+                    <input type="text" id="order-client" required placeholder="e.g. Wayne Enterprises" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Total Amount ($)</label>
+                        <input type="number" step="0.01" id="order-amount" required placeholder="1250.00" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Status</label>
+                        <select id="order-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Completed">Completed</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-2 flex space-x-3">
+                    <button type="button" onclick="closeNewOrderModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-indigo-600/20">Generate Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="new-product-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-800 text-sm">Add New Catalog Product</h3>
+                <button onclick="closeNewProductModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form onsubmit="submitNewProduct(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Product Name</label>
+                    <input type="text" id="prod-name" required placeholder="e.g. AI Workflow Suite" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Category</label>
+                        <select id="prod-category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Software">Software</option>
+                            <option value="Hardware">Hardware</option>
+                            <option value="Infrastructure">Infrastructure</option>
+                            <option value="Services">Services</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Price ($)</label>
+                        <input type="number" step="0.01" id="prod-price" required placeholder="299.00" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">SKU Code</label>
+                        <input type="text" id="prod-sku" placeholder="PROD-9001" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Stock Quantity</label>
+                        <input type="number" id="prod-stock" required placeholder="50" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="pt-2 flex space-x-3">
+                    <button type="button" onclick="closeNewProductModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-indigo-600/20">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Expanded Product Data Array
+        const productsData = [
+            { id: 'PROD-8801', name: 'Enterprise Cloud License', category: 'Software', price: 499.00, stock: 140, status: 'In Stock' },
+            { id: 'PROD-8802', name: 'Hardware Server Blade', category: 'Hardware', price: 1850.00, stock: 3, status: 'Low Stock' },
+            { id: 'SER-101', name: 'Consulting Hours Package', category: 'Services', price: 150.00, stock: 999, status: 'Active' },
+            { id: 'PROD-8803', name: 'Cybersecurity Suite Pro', category: 'Software', price: 799.00, stock: 85, status: 'In Stock' },
+            { id: 'PROD-8804', name: '10Gbps Managed Router', category: 'Hardware', price: 1200.00, stock: 12, status: 'In Stock' },
+            { id: 'PROD-8805', name: 'NVMe SAN Array 50TB', category: 'Infrastructure', price: 4500.00, stock: 2, status: 'Low Stock' },
+            { id: 'PROD-8806', name: 'AI Analytics Add-On', category: 'Software', price: 350.00, stock: 210, status: 'In Stock' },
+            { id: 'SER-102', name: 'DevOps Migration Service', category: 'Services', price: 2500.00, stock: 15, status: 'In Stock' },
+            { id: 'PROD-8807', name: 'Redundant Power Unit 850W', category: 'Hardware', price: 320.00, stock: 0, status: 'Out of Stock' },
+            { id: 'PROD-8808', name: 'Database Optimization Suite', category: 'Software', price: 650.00, stock: 64, status: 'In Stock' }
+        ];
+
+        // Sales Orders Data
+        const ordersData = [
+            { id: '#ORD-1095', customer: 'Acme Corporation', date: 'Oct 15, 2026', amount: '$1,250.00', status: 'Completed', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+            { id: '#ORD-1094', customer: 'Globex Logistics', date: 'Oct 14, 2026', amount: '$450.00', status: 'Processing', badge: 'bg-blue-50 text-blue-700 border-blue-200' },
+            { id: '#ORD-1093', customer: 'Stark Industries', date: 'Oct 14, 2026', amount: '$3,400.00', status: 'Completed', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+            { id: '#ORD-1092', customer: 'Wayne Enterprises', date: 'Oct 13, 2026', amount: '$820.00', status: 'Pending', badge: 'bg-amber-50 text-amber-700 border-amber-200' },
+            { id: '#ORD-1091', customer: 'Nexus Technology Corp', date: 'Oct 12, 2026', amount: '$2,100.00', status: 'Completed', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('salesOS_logged_in');
+            if (isLoggedIn === 'true') {
+                showDashboard();
+            }
+            initChart();
+            renderOrders();
+            renderProducts(productsData);
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            localStorage.setItem('salesOS_logged_in', 'true');
+            localStorage.setItem('salesOS_user', email);
+            showDashboard();
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('salesOS_logged_in');
+            localStorage.removeItem('salesOS_user');
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-view').classList.remove('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            const user = localStorage.getItem('salesOS_user') || 'Admin User';
+            document.getElementById('user-display-name').innerText = user.split('@')[0];
+        }
+
+        function showDemoInfo(e) {
+            e.preventDefault();
+            document.getElementById('login-email').value = 'admin@salesos.com';
+            document.getElementById('login-password').value = 'password123';
+            alertBox('Demo parameters auto-filled! Click "Sign In to Dashboard".', 'Demo Sign-In');
+        }
+
+        function renderProducts(items) {
+            const grid = document.getElementById('products-grid');
+            if (!grid) return;
+
+            grid.innerHTML = items.map(p => {
+                let badgeClass = 'bg-emerald-100 text-emerald-700';
+                if (p.stock === 0) badgeClass = 'bg-rose-100 text-rose-700';
+                else if (p.stock <= 5 && p.category !== 'Services') badgeClass = 'bg-amber-100 text-amber-700';
+
+                return `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-800 truncate pr-2">${p.name}</span>
+                                <span class="text-[10px] ${badgeClass} px-2 py-0.5 rounded-full font-bold shrink-0">${p.stock === 0 ? 'Out of Stock' : (p.stock <= 5 && p.category !== 'Services' ? 'Low Stock' : 'In Stock')}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-3">SKU: ${p.id} &bull; Category: ${p.category}</p>
+                        </div>
+                        <div class="flex items-center justify-between text-xs font-semibold text-slate-700 border-t border-slate-200/60 pt-3">
+                            <span class="text-indigo-600 font-bold">$${p.price.toFixed(2)}</span>
+                            <span class="${p.stock <= 5 && p.category !== 'Services' ? 'text-rose-600 font-bold' : 'text-slate-500'}">
+                                ${p.category === 'Services' ? 'Unlimited' : `Stock: ${p.stock}`}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterProducts() {
+            const category = document.getElementById('product-category-filter').value;
+            if (category === 'All') {
+                renderProducts(productsData);
+            } else {
+                const filtered = productsData.filter(p => p.category === category);
+                renderProducts(filtered);
+            }
+        }
+
+        function openAddProductModal() {
+            document.getElementById('new-product-modal').classList.remove('hidden');
+        }
+
+        function closeNewProductModal() {
+            document.getElementById('new-product-modal').classList.add('hidden');
+        }
+
+        function submitNewProduct(e) {
+            e.preventDefault();
+            const name = document.getElementById('prod-name').value;
+            const category = document.getElementById('prod-category').value;
+            const price = parseFloat(document.getElementById('prod-price').value) || 0;
+            const stock = parseInt(document.getElementById('prod-stock').value) || 0;
+            const skuInput = document.getElementById('prod-sku').value;
+            const sku = skuInput || `PROD-${Math.floor(8000 + Math.random() * 1000)}`;
+
+            const newProd = {
+                id: sku,
+                name: name,
+                category: category,
+                price: price,
+                stock: stock,
+                status: stock > 5 ? 'In Stock' : (stock > 0 ? 'Low Stock' : 'Out of Stock')
+            };
+
+            productsData.unshift(newProd);
+            filterProducts();
+            closeNewProductModal();
+            alertBox(`Product "${name}" (${sku}) added to catalog.`, 'Product Created');
+        }
+
+        function alertBox(message, title = 'System Notification') {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        function triggerNotification() {
+            alertBox('You have 3 unread system alerts.', 'Notifications');
+        }
+
+        function switchTab(tabName) {
+            ['dashboard', 'orders', 'products', 'customers', 'reports'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if (el) el.classList.add('hidden');
+
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (navBtn) {
+                    navBtn.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-medium transition-all hover:bg-slate-800 text-slate-400 hover:text-white";
+                }
+            });
+
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            if (activeTab) activeTab.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            if (activeBtn) {
+                activeBtn.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-600/20";
+            }
+
+            const titles = {
+                dashboard: 'Dashboard Overview',
+                orders: 'Sales Orders Ledger',
+                products: 'Inventory & Catalog',
+                customers: 'Customer Directory',
+                reports: 'Reports & Analytics'
+            };
+            document.getElementById('page-title').innerText = titles[tabName] || 'Dashboard';
+        }
+
+        function renderOrders() {
+            const tbody = document.getElementById('orders-table-body');
+            tbody.innerHTML = ordersData.map(o => `
+                <tr class="hover:bg-slate-50/80 transition-all">
+                    <td class="p-4 font-bold text-slate-800">${o.id}</td>
+                    <td class="p-4 font-semibold text-slate-700">${o.customer}</td>
+                    <td class="p-4 text-slate-500">${o.date}</td>
+                    <td class="p-4 font-bold text-slate-800">${o.amount}</td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${o.badge}">${o.status}</span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="alertBox('Viewing details for ${o.id}')" class="text-indigo-600 hover:text-indigo-800 font-semibold text-xs">Details</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openNewOrderModal() {
+            document.getElementById('new-order-modal').classList.remove('hidden');
+        }
+
+        function closeNewOrderModal() {
+            document.getElementById('new-order-modal').classList.add('hidden');
+        }
+
+        function submitNewOrder(e) {
+            e.preventDefault();
+            const client = document.getElementById('order-client').value;
+            const amount = parseFloat(document.getElementById('order-amount').value).toFixed(2);
+            const status = document.getElementById('order-status').value;
+
+            const badgeMap = {
+                Completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                Processing: 'bg-blue-50 text-blue-700 border-blue-200',
+                Pending: 'bg-amber-50 text-amber-700 border-amber-200'
+            };
+
+            const newOrd = {
+                id: `#ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+                customer: client,
+                date: 'Oct 15, 2026',
+                amount: `$${amount}`,
+                status: status,
+                badge: badgeMap[status] || badgeMap.Pending
+            };
+
+            ordersData.unshift(newOrd);
+            renderOrders();
+            closeNewOrderModal();
+            alertBox(`Order ${newOrd.id} created for ${client}.`, 'Success');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [14000, 21000, 18000, 29000, 26000, 34000, 41000, 38000, 47000, 54820],
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.06)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#4f46e5',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            grid: { color: '#f1f5f9' },
+                            ticks: { font: { family: 'Inter', size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Inter', size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
