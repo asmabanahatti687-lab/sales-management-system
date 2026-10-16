@@ -108,7 +108,7 @@ def init_db():
         )
     """)
 
-  # Seed Default Products if empty
+  # Seed Expanded Products Catalog if empty
   cursor.execute("SELECT COUNT(*) FROM products")
   if cursor.fetchone()[0] == 0:
     sample_products = [
@@ -117,6 +117,9 @@ def init_db():
         ("PRD-103", "Database Backup Suite", "Software", 450.00, 8, 5),
         ("PRD-104", "Wireless Access Point", "Hardware", 120.00, 25, 8),
         ("PRD-105", "IT Consulting (Hourly)", "Services", 150.00, 100, 20),
+        ("PRD-106", "Cybersecurity Firewall", "Hardware", 850.00, 12, 4),
+        ("PRD-107", "Project Management SaaS", "Software", 300.00, 50, 10),
+        ("PRD-108", "Dedicated Storage Node", "Infrastructure", 1500.00, 6, 2),
     ]
     cursor.executemany(
         "INSERT INTO products (code, name, category, price, stock, min_stock)"
@@ -180,8 +183,10 @@ st.session_state["name"] = "System Administrator"
 # ==========================================
 # SIDEBAR NAVIGATION
 # ==========================================
-st.sidebar.markdown(f"### 📦 Sales Management System")
-st.sidebar.caption(f"User: **{st.session_state['name']}** (Admin)")
+st.sidebar.markdown("### 📦 Sales Management System")
+st.sidebar.caption(
+    f"User: **{st.session_state['name']}** ({st.session_state['role']})"
+)
 st.sidebar.divider()
 
 menu_options = [
@@ -364,7 +369,6 @@ elif selected_menu == "Create Order":
           order_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
           cursor = conn.cursor()
-          # Insert Order
           cursor.execute(
               """
                         INSERT INTO orders (order_no, customer_name, order_date, status, subtotal, tax, discount, total)
@@ -381,7 +385,6 @@ elif selected_menu == "Create Order":
               ),
           )
 
-          # Insert Order Item
           cursor.execute(
               """
                         INSERT INTO order_items (order_no, product_name, quantity, price)
@@ -390,14 +393,12 @@ elif selected_menu == "Create Order":
               (order_no, selected_product, quantity, unit_price),
           )
 
-          # Deduct Stock
           new_stock = current_stock - quantity
           cursor.execute(
               "UPDATE products SET stock = ? WHERE name = ?",
               (new_stock, selected_product),
           )
 
-          # Create Default Pending Payment
           cursor.execute(
               """
                         INSERT INTO payments (order_no, amount, method, status, payment_date)
@@ -532,7 +533,7 @@ elif selected_menu == "Product & Inventory":
 
   with tab2:
     with st.form("add_product_form"):
-      code = st.text_input("Product Code (e.g., PRD-106)")
+      code = st.text_input("Product Code (e.g., PRD-109)")
       name = st.text_input("Product Name")
       category = st.selectbox(
           "Category", ["Infrastructure", "Hardware", "Software", "Services"]
@@ -656,4 +657,3 @@ elif selected_menu == "Security Audit Logs":
       "SELECT * FROM audit_logs ORDER BY id DESC", conn
   )
   st.dataframe(df_logs, use_container_width=True)
-      
