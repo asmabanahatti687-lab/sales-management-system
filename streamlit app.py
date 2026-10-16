@@ -412,3 +412,249 @@ elif selected_menu == "Create Order":
           log_action(
               st.session_state["user"],
               f"Created new order {order_no} for {customer_name}",
+          )
+          st.success(
+              f"Order {order_no} created successfully! Total: ${final_total:,.2f}"
+          )
+
+
+# ==========================================
+# 4. INVOICE MANAGEMENT
+# ==========================================
+elif selected_menu == "Invoice Management":
+  st.title("📄 Invoice Management")
+  st.markdown("View and preview generated invoices for sales orders.")
+
+  df_orders = pd.read_sql("SELECT * FROM orders", conn)
+
+  if not df_orders.empty:
+    selected_invoice = st.selectbox(
+        "Select Order for Invoice", df_orders["order_no"].tolist()
+    )
+    order_info = df_orders[df_orders["order_no"] == selected_invoice].iloc[0]
+
+    items = pd.read_sql(
+        f"SELECT * FROM order_items WHERE order_no = '{selected_invoice}'", conn
+    )
+
+    st.markdown(
+        f"""
+        <div class="card">
+            <h3>INVOICE #{order_info['order_no']}</h3>
+            <p><b>Date:</b> {order_info['order_date']}</p>
+            <p><b>Customer:</b> {order_info['customer_name']}</p>
+            <p><b>Status:</b> {order_info['status']}</p>
+            <hr>
+            <h4>Order Items:</h4>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.dataframe(items, use_container_width=True)
+
+    st.markdown(
+        f"""
+            <hr>
+            <p><b>Subtotal:</b> ${order_info['subtotal']:,.2f}</p>
+            <p><b>Discount:</b> ${order_info['discount']:,.2f}</p>
+            <p><b>Tax:</b> ${order_info['tax']:,.2f}</p>
+            <h3><b>Final Amount:</b> ${order_info['total']:,.2f}</h3>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if st.button("🖨️ Print / Export Invoice"):
+      st.success(
+          "Invoice ready for printing! Use your browser's print command (Ctrl+P"
+          " / Cmd+P)."
+      )
+  else:
+    st.info("No invoices available.")
+
+
+# ==========================================
+# 5. CUSTOMER MANAGEMENT
+# ==========================================
+elif selected_menu == "Customer Management":
+  st.title("👥 Customer Management")
+
+  tab1, tab2 = st.tabs(["View Customers", "Add Customer"])
+
+  with tab1:
+    df_customers = pd.read_sql("SELECT * FROM customers", conn)
+    st.dataframe(df_customers, use_container_width=True)
+
+  with tab2:
+    with st.form("add_customer_form"):
+      name = st.text_input("Customer/Company Name")
+      email = st.text_input("Email Address")
+      phone = st.text_input("Phone Number")
+      address = st.text_area("Billing Address")
+      submit_cust = st.form_submit_button("Save Customer")
+
+      if submit_cust:
+        if name and email:
+          cursor = conn.cursor()
+          cursor.execute(
+              "INSERT INTO customers (name, email, phone, address) VALUES (?,"
+              " ?, ?, ?)",
+              (name, email, phone, address),
+          )
+          conn.commit()
+          log_action(
+              st.session_state["user"], f"Added new customer: {name}"
+          )
+          st.success("Customer added successfully!")
+          st.rerun()
+        else:
+          st.error("Please fill in Name and Email.")
+
+
+# ==========================================
+# 6. PRODUCT & INVENTORY MANAGEMENT
+# ==========================================
+elif selected_menu == "Product & Inventory":
+  st.title("📦 Product & Inventory Management")
+
+  tab1, tab2 = st.tabs(["Inventory Catalog", "Add Product"])
+
+  with tab1:
+    df_products = pd.read_sql("SELECT * FROM products", conn)
+    st.dataframe(df_products, use_container_width=True)
+
+    low_stock_df = df_products[
+        df_products["stock"] <= df_products["min_stock"]
+    ]
+    if not low_stock_df.empty:
+      st.warning(
+          "⚠️ Low stock alert for the following items:"
+          f" {', '.join(low_stock_df['name'].tolist())}"
+      )
+
+  with tab2:
+    with st.form("add_product_form"):
+      code = st.text_input("Product Code (e.g., PRD-109)")
+      name = st.text_input("Product Name")
+      category = st.selectbox(
+          "Category", ["Infrastructure", "Hardware", "Software", "Services"]
+      )
+      price = st.number_input("Selling Price ($)", min_value=0.0, value=100.0)
+      stock = st.number_input(
+          "Initial Stock Quantity", min_value=0, value=10, step=1
+      )
+      min_stock = st.number_input(
+          "Minimum Stock Threshold", min_value=0, value=5, step=1
+      )
+      submit_prod = st.form_submit_button("Add Product")
+
+      if submit_prod:
+        if code and name:
+          try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                            INSERT INTO products (code, name, category, price, stock, min_stock)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                (code, name, category, price, stock, min_stock),
+            )
+            conn.commit()
+            log_action(st.session_state["user"], f"Added product: {name}")
+            st.success("Product added successfully!")
+            st.rerun()
+          except sqlite3.IntegrityError:
+            st.error("Product code already exists.")
+        else:
+          st.error("Please fill in Product Code and Name.")
+
+
+# ==========================================
+# 7. SALES REPORTS
+# ==========================================
+elif selected_menu == "Sales Reports":
+  st.title("📈 Sales Reports & Analytics")
+
+  df_orders = pd.read_sql("SELECT * FROM orders", conn)
+
+  if not df_orders.empty:
+    total_revenue = df_orders["total"].sum()
+    st.metric("Total Revenue", f"${total_revenue:,.2f}")
+
+    col1, col2 = st.columns(2)
+    with col1:
+      fig = px.bar(
+          df_orders,
+          x="customer_name",
+          y="total",
+          color="customer_name",
+          title="Sales by Customer",
+      )
+      st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+      fig2 = px.pie(
+          df_orders,
+          names="status",
+          values="total",
+          title="Revenue Share by Order Status",
+      )
+      st.plotly_chart(fig2, use_container_width=True)
+
+    st.subheader("📥 Export Reports")
+    csv_data = df_orders.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="Download Sales Report (CSV)",
+        data=csv_data,
+        file_name="sales_report.csv",
+        mime="text/csv",
+    )
+  else:
+    st.info("No data available for reports.")
+
+
+# ==========================================
+# 8. PAYMENT TRACKING
+# ==========================================
+elif selected_menu == "Payment Tracking":
+  st.title("💳 Payment Tracking")
+
+  df_payments = pd.read_sql("SELECT * FROM payments", conn)
+  if not df_payments.empty:
+    st.dataframe(df_payments, use_container_width=True)
+
+    with st.form("update_payment"):
+      payment_id = st.selectbox(
+          "Select Payment Record ID", df_payments["id"].tolist()
+      )
+      new_pay_status = st.selectbox(
+          "Payment Status", ["Pending", "Partially Paid", "Paid", "Refunded"]
+      )
+      pay_btn = st.form_submit_button("Update Payment Status")
+
+      if pay_btn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE payments SET status = ? WHERE id = ?",
+            (new_pay_status, payment_id),
+        )
+        conn.commit()
+        log_action(
+            st.session_state["user"],
+            f"Updated payment ID {payment_id} to {new_pay_status}",
+        )
+        st.success("Payment status updated!")
+        st.rerun()
+  else:
+    st.info("No payment records found.")
+
+
+# ==========================================
+# 9. SECURITY AUDIT LOGS
+# ==========================================
+elif selected_menu == "Security Audit Logs":
+  st.title("🛡️ Security Audit Logs")
+  df_logs = pd.read_sql(
+      "SELECT * FROM audit_logs ORDER BY id DESC", conn
+  )
+  st.dataframe(df_logs, use_container_width=True)
