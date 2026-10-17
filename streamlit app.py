@@ -1,5 +1,6 @@
 import datetime
 import sqlite3
+from io import BytesIO
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -14,6 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Custom CSS matching the professional business theme (#2563EB Blue & Light Gray)
 st.markdown(
     """
     <style>
@@ -106,7 +108,7 @@ def init_db():
         )
     """)
 
-  # Seed Expanded Products Catalog if empty
+  # Seed Expanded Products List
   cursor.execute("SELECT COUNT(*) FROM products")
   if cursor.fetchone()[0] == 0:
     sample_products = [
@@ -154,6 +156,28 @@ def init_db():
         sample_customers,
     )
 
+  # Seed Initial Order if empty
+  cursor.execute("SELECT COUNT(*) FROM orders")
+  if cursor.fetchone()[0] == 0:
+    cursor.execute(
+        """
+        INSERT INTO orders (order_no, customer_name, order_date, status, subtotal, tax, discount, total)
+        VALUES ('ORD-1001', 'Acme Corp', '2026-10-15', 'Delivered', 1200.00, 60.00, 0.00, 1260.00)
+    """
+    )
+    cursor.execute(
+        """
+        INSERT INTO order_items (order_no, product_name, quantity, price)
+        VALUES ('ORD-1001', 'Enterprise Cloud Server', 1, 1200.00)
+    """
+    )
+    cursor.execute(
+        """
+        INSERT INTO payments (order_no, amount, method, status, payment_date)
+        VALUES ('ORD-1001', 1260.00, 'Credit Card', 'Paid', '2026-10-15')
+    """
+    )
+
   conn.commit()
   return conn
 
@@ -172,21 +196,18 @@ def log_action(user, action):
 
 
 # ==========================================
-# SAFE SESSION STATE INITIALIZATION
+# DEFAULT SESSION STATE (No Login Required)
 # ==========================================
-if "user" not in st.session_state:
-  st.session_state["user"] = "admin"
-if "role" not in st.session_state:
-  st.session_state["role"] = "Admin"
-if "name" not in st.session_state:
-  st.session_state["name"] = "System Administrator"
+st.session_state["user"] = "admin"
+st.session_state["role"] = "Admin"
+st.session_state["name"] = "System Administrator"
 
 # ==========================================
 # SIDEBAR NAVIGATION
 # ==========================================
-st.sidebar.markdown("### 📦 Sales Management System")
+st.sidebar.markdown("### 📦 SalesPro System")
 st.sidebar.caption(
-    f"User: **{st.session_state['name']}** ({st.session_state['role']})"
+    f"Logged in as: **{st.session_state['name']}** ({st.session_state['role']})"
 )
 st.sidebar.divider()
 
