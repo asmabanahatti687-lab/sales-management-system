@@ -1,126 +1,88 @@
-Sales Management System (SalesOS)
+# 📦 Sales Management System (SalesPro)
 
-A complete, modern, professional, user-friendly, and responsive Sales Management System website built to help businesses manage sales orders, customers, stock inventory, invoices, and analytical reports efficiently.
+A modern, responsive, user-friendly, and feature-complete **Sales Management System** built with HTML5, Tailwind CSS, JavaScript (ES6+), and Chart.js. This application empowers businesses to efficiently manage sales orders, customers, product catalogs, inventory stock levels, printable invoices, payment statuses, and security audit logs.
 
-🌟 Key Features & Modules
+---
 
-Secure Authentication & Role-Based Access Control (RBAC):
+## 🚀 Live Demo & Quick Start
 
-Secure login & session management.
+Because the application is completely self-contained within a single frontend bundle (`index.html`), **no server installation or database setup is required** to run the static web app.
 
-Role-based permissions separating Admin and Staff privileges.
+1. **Download** or clone this repository to your local machine.
+2. Open `index.html` directly in any modern web browser (Google Chrome, Mozilla Firefox, Microsoft Edge, Safari).
 
-Protected routes and automated audit logging.
+### 🔑 Demo Credentials
 
-Business Dashboard:
+| Role | Username | Password | Accessible Modules |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin` | `admin123` | Full Access (including Audit Logs) |
+| **Sales Staff** | `staff` | `staff123` | Standard Modules (Orders, Customers, Inventory) |
 
-Real-time calculations of total revenue, orders, pending/completed fulfillments, and active clients.
+---
 
-Dynamic interactive charts powered by Chart.js.
+## ✨ Key Features
 
-Low-stock warnings and live activity audit trails.
+### 1. 🔐 Authentication & Role-Based Access Control
+- Secure login interface supporting role differentiation (**Admin** vs. **Staff**).
+- Show/Hide password toggle.
+- Session persistence and audit logging upon login/logout.
 
-Sales Order Management:
+### 2. 📊 Interactive Business Dashboard
+- **KPI Summary Cards:** Real-time tracking of Total Revenue, Total Orders, Pending Orders, and Low Stock Alerts.
+- **Dynamic Charts (Chart.js):**
+  - **Revenue Trends:** Visual line chart calculated directly from completed sales orders.
+  - **Inventory Stock Bar Chart:** Real-time distribution of available product quantities.
 
-Create and track custom sales orders with automated tax, discount, and subtotal calculations.
+### 3. 🛒 Sales Order & Stock Management
+- **Live Order Creation:** Select customers, products, quantities, and custom tax rates.
+- **Automatic Inventory Deduction:** Stock levels automatically decrease upon order confirmation.
+- **Stock Threshold Validation:** Prevents overselling by blocking orders that exceed available quantity.
+- **Status Tracking:** Track orders through `Pending`, `Processing`, `Shipped`, `Delivered`, and `Cancelled`.
 
-Status tracking across Pending, Processing, Shipped, Delivered, and Cancelled.
+### 4. 📄 Invoice Generation & Export
+- Automated generation of professional invoices for all sales orders.
+- Itemized breakdowns showing subtotal, tax calculations, and final amounts.
+- **Print Support:** One-click browser print integration tailored for hard-copy printing or saving as PDF.
 
-Unique generated order numbers.
+### 5. 📦 Product & Inventory Catalog
+- Expanded pre-seeded product list across Infrastructure, Hardware, Software, and Services.
+- **Low-Stock Indicators:** Visual badges highlighting items falling below minimum threshold levels.
 
-Invoice Management:
+### 6. 👥 Customer Management & Payment Tracking
+- Detailed directory storing customer contact details and addresses.
+- Payment tracker recording payment methods, amounts, and statuses (`Pending`, `Paid`, `Partially Paid`, `Refunded`).
 
-Generate, preview, and print invoices directly from confirmed orders.
+### 7. 📈 Sales Reports & CSV Export
+- View sales metrics filtered across all transaction records.
+- **CSV Export:** Download raw order history and transaction data directly to `.csv` for external analysis in Excel or Google Sheets.
 
-Professional layout including business and client credentials, itemized lists, and payment status tracking.
+### 8. 🛡️ Security Audit Logs
+- Immutable activity record tracking user logins, order creations, and status modifications.
 
-Customer Management:
+---
 
-Add, view, edit, and deactivate customer records with validated emails and phone numbers.
+## 🛠️ Technology Stack
 
-Track total purchase history per client.
+- **Structure:** HTML5
+- **Styling:** Tailwind CSS (via CDN)
+- **Interactivity:** JavaScript (ES6 Modules, Local State Management)
+- **Data Visualization:** Chart.js
+- **Iconography:** FontAwesome 6
 
-Product & Inventory Management:
+---
 
-Manage stock levels, minimum stock thresholds, and categories (Software, Hardware, Infrastructure, Services).
+## 📁 Recommended Project Folder Structure
 
-Automated inventory deduction upon completed sales and prevention of negative stock.
+If organizing into separate assets for production deployment:
 
-Sales Reports & Analytics:
-
-Export summary metrics to CSV.
-
-Date-range filtering and comprehensive revenue summaries.
-
-🚀 Getting Started & Installation
-
-Option 1: Running the Single-File Web Application (Frontend)
-
-Download or save the index.html file to your local computer.
-
-Open the file in any modern web browser (Chrome, Firefox, Safari, Edge).
-
-Use the demo login credentials to sign in.
-
-Option 2: Running the Python Streamlit Full Application
-
-If you prefer the Python/SQLite implementation:
-
-Ensure Python 3.8+ is installed on your machine.
-
-Install the required dependencies:
-
-pip install streamlit pandas plotly
-
-
-Run the application:
-
-streamlit run app.py
-
-
-🔐 Default Demo Credentials
-
-Role
-
-Username
-
-Password
-
-Access Level
-
-Admin
-
-admin@salesos.com / admin
-
-password123 / admin123
-
-Full Access (Users, Security, Reports, Catalog)
-
-Staff
-
-staff@salesos.com / staff
-
-password123 / staff123
-
-Standard Access (Orders, Customers, Inventory)
-
-🛠️ Technology Stack
-
-Frontend: HTML5, Tailwind CSS, FontAwesome Icons, Chart.js / Plotly.
-
-Backend & Logic: JavaScript (ES6+) or Python Streamlit / SQLite3.
-
-Design System: Professional business theme featuring primary blue (#2563EB) and light gray (#F4F7FB) layouts.
-
-📂 Project Structure
-
+```text
 sales-management-system/
 │
-├── index.html         # Single-file production web application
-├── app.py             # Python Streamlit full-stack implementation
-└── README.md          # Project documentation and setup guide
-
-
-🤝 Support & Contribution
-
-Contributions, bug reports, and feature requests are welcome. Feel free to open an issue or submit a pull request.
+├── index.html            # Main HTML file (UI & View Containers)
+├── css/
+│   └── styles.css        # Custom CSS overrides and animations
+├── js/
+│   ├── app.js            # Core application state & navigation logic
+│   ├── auth.js           # Authentication & permission handling
+│   └── chart-config.js   # Chart.js initialization & data rendering
+└── README.md             # Project documentation
